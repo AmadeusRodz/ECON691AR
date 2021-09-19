@@ -35,7 +35,7 @@ rm(i, URL, states, tables, results, webpage, results2, temp)
 
 votes<-rbind(illinois,iowa,missouri,kansas,arkansas)
 
-save(votes,file="./ECON691AR/Build/Output/census2.RData")
+save(votes,file="./ECON691AR/Build/Output/votes.RData")
 
 save.image()
 
@@ -127,24 +127,38 @@ census2<-acs %>%
 
 save(census2,file="./ECON691AR/Build/Output/census2.RData")
 
-#finding percent change between the variables of two data frames, I'm stuck
+rm(list=ls())
 
 library(tidyverse)
 
-delta<-function(x){
-  pctchange<-((x-lag(x))/lag(x))
-  return(pctchange)
-  
-}
-df.list <- list(census1,census2)
-res <- lapply(df.list, delta(x))
+load("./Build/Output/census1.RData") 
+load("./Build/Output/census2.RData")  
 
+census1_1<-census1 %>%
+  mutate(county = as.data.frame(str_split_fixed(NAME, ",", 2))[,1],
+         county = trimws(gsub(" County", "", county)))
 
-save(res, file = "./ECON691AR/Build/Output/census3.RData")
+#st.Louis counties for fips 29 missouri
 
+census1$County[which(census1$County=="DeWitt")]<-"De Witt"
+census1$County[which(census1$County=="JoDaviess")]<-"Jo Daviess" 
+census1$County[which(census1$County=="LaClede")]<-"Laclede" 
+census1$County[which(census1$County=="LaRue")]<-"Larue" 
+census1$County[which(census1$County=="St. Louis City")]<-"St. Louis city" 
+census1$county[which(census1$county=="St. Louis")]<-"St. Louis County"
 
+census2_2<-census2 %>%
+  mutate(county = as.data.frame(str_split_fixed(NAME, ",", 2))[,1],
+         county = trimws(gsub(" County", "", county)))
 
+census2$County[which(census2$County=="DeWitt")]<-"De Witt"
+census2$County[which(census2$County=="JoDaviess")]<-"Jo Daviess" 
+census2$County[which(census2$County=="LaClede")]<-"Laclede" 
+census2$County[which(census2$County=="LaRue")]<-"Larue" 
+census2$County[which(census2$County=="St. Louis City")]<-"St. Louis city" 
+census2$county[which(census2$county=="St. Louis")]<-"St. Louis County"
 
+core<-merge(census1_1, census2_2, by.x=c("state", "county"), by.y=c("State", "County"),all=TRUE)
 
 
 
